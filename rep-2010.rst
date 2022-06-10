@@ -234,8 +234,30 @@ Any existing tooling for aiding users in setting up ROS security should consider
 Command line interface
 ----------------------
 
-SUppose we have a service named ``/add_two_ints`` of type ``example_interfaces/srv/AddTwoInts``
+Suppose we have a service named ``/add_two_ints`` of type ``example_interfaces/srv/AddTwoInts``.
 We can have a tool like ``ros2 service echo /add_two_ints`` that internally subscribes to the two hidden topics ``example_interfaces/srv/AddTwoInts_RequestEvent``, ``example_interfaces/srv/AddTwoInts_ResponseEvent`` and echoes them. It should also support additional command line parameters used for topics, like ``--filter, --no-arr, --no-str, --include-msg-info``, etc.
+
+For example,
+.. code-block::
+
+   $ ros2 service echo /add_two_ints
+   -----------------------
+   request_type: REQUEST_SENT
+   stamp: 1.00
+   client_id: 1234
+   sequence_number: 1
+   request:
+      a: 1
+      b: 2
+   -----------------------
+   request_type: REQUEST_RECEIVED
+   stamp: 1.10
+   client_id: 1234
+   sequence_number: 1
+   request:
+      a: 1
+      b: 2
+   -----------------------
 
 Additional parameters could be included like ``--response-time``, which should print the delay between the time the client sent the request and the server sent the response, or ``--exculde-msg-content`` to just echo the events and not the content of messages.
 
