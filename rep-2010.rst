@@ -252,11 +252,25 @@ For example,
    -----------------------
    request_type: REQUEST_RECEIVED
    stamp: 1.10
-   client_id: 1234
+   client_id: 1235
    sequence_number: 1
    request:
       a: 1
       b: 2
+   -----------------------
+   request_type: RESPONSE_SENT
+   stamp: 1.20
+   client_id: 1235
+   sequence_number: 2
+   request:
+      sum: 3
+   -----------------------
+   request_type: RESPONSE_RECEIVED
+   stamp: 1.30
+   client_id: 1234
+   sequence_number: 2
+   request:
+      sum: 3
    -----------------------
 
 Additional parameters could be included like ``--response-time``, which should print the delay between the time the client sent the request and the server sent the response, or ``--exculde-msg-content`` to just echo the events and not the content of messages.
