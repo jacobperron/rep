@@ -234,8 +234,41 @@ Any existing tooling for aiding users in setting up ROS security should consider
 Command line interface
 ----------------------
 
+The existing ``ros2 service`` tool can be extended using an ``echo`` keyword to monitor service events.
+Internally, it would subscribe to the hidden topics and echo them. The existing command line parameters for topics can be extended to be used with this ``echo`` verb, along with new
+arguments on to filter message content and analyse delays.
+
+Rationale
+=========
+
+Only supporting one service per name
+------------------------------------
+
+TODO
+
+Separate request and response events instead of single service event
+--------------------------------------------------------------------
+
+TODO
+
+Optional content
+----------------
+
+TODO
+
+Backwards Compatibility
+=======================
+
+TODO
+
+Feature Progress
+================
+
+Proposed command line usage example
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 Suppose we have a service named ``/add_two_ints`` of type ``example_interfaces/srv/AddTwoInts``.
-We can have a tool like ``ros2 service echo /add_two_ints`` that internally subscribes to the two hidden topics ``example_interfaces/srv/AddTwoInts_RequestEvent``, ``example_interfaces/srv/AddTwoInts_ResponseEvent`` and echoes them. It should also support additional command line parameters used for topics, like ``--filter, --no-arr, --no-str, --include-msg-info``, etc.
+We can extend ``ros2 service`` with an ``echo`` verb such that it internally subscribes to the two hidden topics ``example_interfaces/srv/AddTwoInts_RequestEvent``, ``example_interfaces/srv/AddTwoInts_ResponseEvent`` and echoes them.
 
 For example,
 .. code-block::
@@ -272,36 +305,6 @@ For example,
    request:
       sum: 3
    -----------------------
-
-Additional parameters could be included like ``--response-time``, which should print the delay between the time the client sent the request and the server sent the response, or ``--exculde-msg-content`` to just echo the events and not the content of messages.
-
-Rationale
-=========
-
-Only supporting one service per name
-------------------------------------
-
-TODO
-
-Separate request and response events instead of single service event
---------------------------------------------------------------------
-
-TODO
-
-Optional content
-----------------
-
-TODO
-
-Backwards Compatibility
-=======================
-
-TODO
-
-Feature Progress
-================
-
-TODO
 
 References
 ==========
