@@ -235,7 +235,8 @@ Command line interface
 ----------------------
 
 The existing ``ros2 service`` tool can be extended using an ``echo`` keyword to monitor service events.
-Internally, it would subscribe to the hidden topics and echo them. The existing command line parameters for topics can be extended to be used with this ``echo`` verb, along with new
+Internally, it would subscribe to the hidden topics and echo them.
+The existing command line parameters for topics can be extended to be used with this ``echo`` verb, along with new
 arguments on to filter message content and analyse delays.
 
 Rationale
