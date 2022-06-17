@@ -265,7 +265,7 @@ Rationale
 Using ROS Parameters for configuration
 --------------------------------------
 ROS parameters provide a well-known and supported way of interacting with node-level settings at various points in a node's lifecycle.
-An user may want to avoid the overhead of publishing service event messages during normal operation,
+A user may want to avoid the overhead of publishing service event messages during normal operation,
 so it is desirable to be able to enable service introspection features during runtime.
 There is existing tooling to work with parameters on a per-node basis such as the ``parameter_client`` API in ``rclcpp`` or ``rclpy`` as well as for groups of nodes in ``ros2 launch`` or all nodes using wildcards in ``YAML`` parameter files [10]_.
 This makes ROS parameters the ideal choice as opposed to using environment variables or some other custom implementation.
