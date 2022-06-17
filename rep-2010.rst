@@ -301,7 +301,7 @@ Optional content
 ----------------
 
 Duplicating request or response content will be optional as service response messages can be *very* large and flooding the ROS network with up to four copies of the same message can introduce undesirable load and latency.
-By default content will be included on ``REQUEST_SENT`` and ``RESPONSE_SENT``. 
+By default content will be included on ``CLIENT_SENT`` and ``SERVICE_SENT``. 
 
 
 Backwards Compatibility
