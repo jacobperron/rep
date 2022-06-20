@@ -327,6 +327,11 @@ Backwards Compatibility
 The addition of service introspection should not impact existing logic.
 As an opt-in feature, users should not incur additional overhead by default.
 
+Feature Progress
+================
+
+TODO: developement of a protoype is underway.
+
 
 Other
 =====
