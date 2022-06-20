@@ -220,32 +220,31 @@ Configuration
 -------------
 
 Configuration of service introspection features will be done through ROS parameters.
+Each node may offer the following 4 Boolean parameters:
+
+:publish_client_events:
+  If true, then client request sent and response received events will be published for all clients created by this node.
+:publish_service_events:
+  If true, then service request received and response sent events will be published for all services created by this node.
+:client_event_content:
+  If true, then client event messages will include the request and response content.
+  Only applies if ``publish_client_events`` is ``true``.
+:service_event_content:
+  If true, then service event messages will include the request and response content.
+  Only applies if ``publish_service_events`` is ``true``.
+
+By default, all parameters shall be ``false`` so users do not pay for a feature they do not plan to use.
+Furthermore, node authors may opt-in by default or disable the service introspection feature altogether as they see fit.
+
+As an example, users can turn on introspection for services by providing the following parameters YAML file to nodes they run [10]_:
 
 .. code-block:: yaml
 
-   /NODE_NAME:
+   /**:
       ros__parameters:
-         
-         # Indicates if CLIENT_SENT and CLIENT_RECEIVED events will be published
-         SERVICE_NAME/client_events_enabled: bool
-
-         # Indicates if SERVICE_SENT and SERVICE_RECEIVED events will be published
-         SERVICE_NAME/service_events_enabled: bool
-         
-         # Indicates if request content will be included in CLIENT_SENT RequestEvent messages
-         SERVICE_NAME/_enable_client_sent_content: bool
-
-         # Indicates if request content will be included in SERVICE_RECEIVED RequestEvent messages
-         SERVICE_NAME/_enable_service_receive_content: bool
-
-         # Indicates if response content will be included in SERVICE_SENT RequestEvent messages
-         SERVICE_NAME/_enable_service_sent_content: bool
-
-         # Indicates if response content will be included in CLIENT_RECEIVED RequestEvent messages
-         SERVICE_NAME/_enable_client_receive_content: bool
-         
-         # Indicates if service introspection will be enabled for default services
-         _enable_default_service_introspection: bool 
+         publish_service_events: true
+         # Also include request and response content in event messages
+         service_event_content: true
 
 
 Security
@@ -264,11 +263,30 @@ Rationale
 
 Using ROS Parameters for configuration
 --------------------------------------
-ROS parameters provide a well-known and supported way of interacting with node-level settings at various points in a node's lifecycle.
-A user may want to avoid the overhead of publishing service event messages during normal operation,
-so it is desirable to be able to enable service introspection features during runtime.
-There is existing tooling to work with parameters on a per-node basis such as the ``parameter_client`` API in ``rclcpp`` or ``rclpy`` as well as for groups of nodes in ``ros2 launch`` or all nodes using wildcards in ``YAML`` parameter files [10]_.
-This makes ROS parameters the ideal choice as opposed to using environment variables or some other custom implementation.
+
+ROS parameters are the canonical way to configure a node at runtime, and so it seems to be a natural choice for configuring the service introspection feature.
+We can benefit from existing tools for interacting with parameters such as the parameter services API in ``rclcpp`` or ``rclpy`` and ROS launch files [9]_.
+Parameters also offer the convenience of being reconfigurable during runtime, so by extension service introspection may be toggled on and off while the node is running.
+
+Environment variables were considered as an alternative method for configuring service introspection, however they are not reconfigurable during runtime and do not naturally map to nodes the same way parameter do.
+
+Configuration options
+---------------------
+
+The number of configuration options was chosen as a compromise between flexibility and complexity.
+At one extreme, service introspection could be configured per-service with nodes offering S * 4 parameters, where S is the number of services and each have 4 parameters as described in `Coniguration <Configuration_>`_.
+This runs the risk of overwhelming users with the shear number of parameters offered by a node.
+At the other extreme, there could be a single option to enable service introspection for all services in a ROS system, which is not very flexible.
+
+It seems likely that there will by a large number of users that will want to introspect (or record) all services in system,
+therefore it should be easy to turn on the feature for all services.
+However, since it is difficult to predict how the feature will ultimately be used, we want to provide some flexibility.
+
+Boolean parameters are chosen as an easy way to toggle the feature on and off per node (because ROS parameters are stored per node).
+Recognizing that both client events and service events contain redundant information (besides timestamps), we provide a separate parameter to toggle the feature for clients.
+Similarily, extra overhead may arise in cases where service requests or respones are *very* large.
+So, additional parameters are offered to avoid sending content for client or service events.
+This way users who are concerned with extra overhead incurred by enabling service introspection have options for mitigation.
 
 
 Default Services
@@ -276,7 +294,7 @@ Default Services
 
 ROS 2 parameters are built on top of ROS 2 service/clients and already publish out to ``/parameter_events`` on parameter changes [11]_.
 As parameters can be set directly by the host as well as through the corresponding parameter service, the service introspection proposed by this REP would fail to capture a subset of parameter events.
-For this reason service introspection will be disabled by default for ROS 2 parameters in favour of ``/parameter_events``. 
+For this reason service introspection will be disabled by default for ROS 2 parameters in favour of ``/parameter_events``.
 This behavior can be changed through `a parameter <Configuration_>`_ if desired.
 
 
@@ -289,25 +307,19 @@ This use case will not be supported since enabling service introspection in such
 Separate request and response events instead of single service event
 --------------------------------------------------------------------
 
-Separate events for requests and responses will be published instead of a single service event or 
+Separate events for requests and responses will be published instead of a single service event or
 publishing an unique event for clients and services (for a total of 4 event types).
-This is to best balance avoiding introducing additional topic surface area and complexity of consuming emitted introspection data. 
+This is to best balance avoiding introducing additional topic surface area and complexity of consuming emitted introspection data.
 Grouping events by request or response rather than by client or subscriber would also ease request/response tracing work.
 
 .. Concern: our enable flags are enable by serv/client but our messages are grouped via req/response. Could be confusing?
 
 
-Optional content
-----------------
-
-Duplicating request or response content will be optional as service response messages can be *very* large and flooding the ROS network with up to four copies of the same message can introduce undesirable load and latency.
-By default content will be included on ``CLIENT_SENT`` and ``SERVICE_SENT``. 
-
 
 Backwards Compatibility
 =======================
 
-Service introspection is a new feature which is not planned to impact any existing logic. 
+Service introspection is a new feature which is not planned to impact any existing logic.
 It is also an opt-in feature so there will be no additional incurred overhead by default.
 As always, code written to take advantage of this new feature will not be backwards compatible (at least regarding this feature) with versions of ROS 2 that do not have it implemented.
 
@@ -373,7 +385,7 @@ Syntactic sugar may be included to enable service introspection and record, e.g.
 Replaying service and client events
 -----------------------------------
 
-The design should support implementation of a tool for "replaying" service and client events. 
+The design should support implementation of a tool for "replaying" service and client events.
 For example, tooling may be developed to take the recorded event stream and replay requests and responses back into the ROS network.
 
 
@@ -404,8 +416,8 @@ References
 .. [8] NoDL
    (https://github.com/ubuntu-robotics/nodl)
 
-.. [9] Launch
-   (https://github.com/ros2/launch)
+.. [9] Launch ROS
+   (https://github.com/ros2/launch_ros)
 
 .. [10] YAML parameter file wildcard
    (https://docs.ros.org/en/rolling/Tutorials/Launch/Using-ROS2-Launch-For-Large-Projects.html#using-wildcards-in-yaml-files)
