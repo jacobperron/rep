@@ -247,6 +247,10 @@ As an example, users can turn on introspection for services by providing the fol
          service_event_content: true
 
 
+Since it is possible to set parameters with a parameter service [11]_, one or more service events *may* be published when setting a service introspection parameter.
+The behavior depends on the order of operations and is defined by the implementation.
+For example, if ``publish_service_events`` was previously set to ``true``, then any service call to change one of the parameters defined above may cause a service request event and/or a response event to be published for the parameter service.
+
 Security
 --------
 
@@ -291,13 +295,12 @@ So, additional parameters are offered to avoid sending content for client or ser
 This way users who are concerned with extra overhead incurred by enabling service introspection have options for mitigation.
 
 
-Default Services
-----------------
+Parameter Services
+------------------
 
-ROS 2 parameters are built on top of ROS 2 service/clients and already publish out to ``/parameter_events`` on parameter changes [11]_.
-As parameters can be set directly by the host as well as through the corresponding parameter service, the service introspection proposed by this REP would fail to capture a subset of parameter events.
-For this reason service introspection will be disabled by default for ROS 2 parameters in favour of ``/parameter_events``.
-This behavior can be changed through `a parameter <Configuration_>`_ if desired.
+There already exists a set of default services for interacting with ROS parameters [11]_.
+There is also the ``/parameter_events`` topic where changes to ROS parameters for all nodes are published.
+We considered leveraging this REP to implement (or replace) the existing ``/parameter_events`` topic, however parameter events may be triggered by local changes in a node (and not necessarily through a parameter service), so we cannot capture all parameter events from service events.
 
 
 Only supporting one service per name
