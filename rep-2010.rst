@@ -273,6 +273,8 @@ Environment variables were considered as an alternative method for configuring s
 Configuration options
 ---------------------
 
+It would be nice to define a single enumeration type to reduce the number of configuration points, however since ROS parameters do not support enumeration types multiple Boolean parameters are defined instead.
+
 The number of configuration options was chosen as a compromise between flexibility and complexity.
 At one extreme, service introspection could be configured per-service with nodes offering S * 4 parameters, where S is the number of services and each have 4 parameters as described in `Coniguration <Configuration_>`_.
 This runs the risk of overwhelming users with the shear number of parameters offered by a node.
